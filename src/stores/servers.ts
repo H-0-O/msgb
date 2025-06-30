@@ -1,4 +1,4 @@
-import type { Connection } from '@/util/types';
+import type { Server } from '@/util/types';
 import {
   StringCodec,
   connect as wsConnect,
@@ -10,24 +10,24 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 
-export const useConnectionStore = defineStore('connection', () => {
+export const useServersStore = defineStore('servers', () => {
   const types = {
     Nats: "Nats"
   };
   
-  const connections = ref<Connection[]>([]);
+  const servers = ref<Server[]>([]);
 
-  const wsConnection = ref<NatsConnection>()
+  const wsServers = ref<NatsConnection>()
   const sc = StringCodec()
 
   async function connect(options: ConnectionOptions) {
-    wsConnection.value = await wsConnect(options)
-    console.log(`connected to ${wsConnection.value.getServer()}`)
+    wsServers.value = await wsConnect(options)
+    console.log(`connected to ${wsServers.value.getServer()}`)
   }
 
   async function subscribe(subscription: string) {
-    if (!wsConnection.value) throw new Error('The connection not established')
-    const sub = wsConnection.value.subscribe(subscription)
+    if (!wsServers.value) throw new Error('The connection not established')
+    const sub = wsServers.value.subscribe(subscription)
     listener(sub)
   }
 
@@ -39,14 +39,14 @@ export const useConnectionStore = defineStore('connection', () => {
   }
 
   async function publish<T>(subscription: string, payload: T) {
-    if (!wsConnection.value) throw new Error('The connection not established')
+    if (!wsServers.value) throw new Error('The connection not established')
     const _payload = typeof payload == 'string' ? payload : JSON.stringify(payload)
-    wsConnection.value.publish(subscription, sc.encode(_payload))
+    wsServers.value.publish(subscription, sc.encode(_payload))
   }
 
   return {
-    connections,
-    wsConnection,
+    servers,
+    wsServers,
     types,
     connect,
     subscribe,

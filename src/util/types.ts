@@ -1,6 +1,6 @@
 export type ServerType = 'Nats'
 
-export interface Connection {
+export interface Server {
   name: string
   ServerType: ServerType
   ServerAddress: string

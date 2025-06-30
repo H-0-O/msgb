@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Menu from './layout/menu.vue'
-import { useConnectionStore } from './stores/connection';
-useConnectionStore();
+import { useServersStore } from './stores/servers';
+useServersStore();
 </script>
 
 <template>
