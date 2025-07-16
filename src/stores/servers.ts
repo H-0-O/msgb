@@ -1,4 +1,5 @@
 import type { Server } from '@/util/types'
+import axios from 'axios'
 import {
   StringCodec,
   connect as wsConnect,
@@ -7,7 +8,7 @@ import {
   type Subscription,
 } from 'nats.ws'
 import { defineStore } from 'pinia'
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 export const useServersStore = defineStore(
   'servers',
@@ -18,43 +19,41 @@ export const useServersStore = defineStore(
 
     const servers = ref<Server[]>([])
 
-    const selectedServer = ref<Server>({} as Server)
+    const selectedServer = ref<Server>()
 
     const wsServer = ref<NatsConnection>()
 
     const sc = StringCodec()
 
-    watch(
-      selectedServer,
-      async (newServer) => {
-        console.info('Server changed')
+    watch(selectedServer, changeServer, {
+      flush: 'post',
+    })
 
-        if (newServer == undefined) return
+    async function changeServer(newServer: Server | undefined) {
+      console.info('Server changed')
 
-        console.info('Changing server to:', newServer.ServerAddress)
+      if (newServer == undefined) return
 
-        if (wsServer.value != undefined) {
-          console.info('Disconnecting from server:', wsServer.value.getServer())
+      console.info('Changing server to:', newServer.ServerAddress)
 
-          //kill the previous connection
-          await wsServer.value.drain()
-        }
-        console.info('Connecting to server:', newServer.ServerAddress)
+      if (wsServer.value != undefined) {
+        console.info('Disconnecting from server:', wsServer.value.getServer())
 
-        await connect({
-          servers: newServer?.ServerAddress,
-          timeout: 1000,
-        })
-      },
-      {
-        flush: 'post',
-      },
-    )
+        //kill the previous connection
+        await wsServer.value.drain()
+      }
+      console.info('Connecting to server:', newServer.ServerAddress)
 
+      await connect({
+        servers: newServer?.ServerAddress,
+        timeout: 1000,
+      })
+    }
     async function connect(options: ConnectionOptions) {
       try {
         wsServer.value = await wsConnect(options)
         console.info(`connected to ${wsServer.value.getServer()}`)
+        const wwe = new URL(wsServer.value.getServer())
       } catch (error) {
         console.error(`Can not connect to server ${options.servers?.[0]}: `, error)
       }
@@ -79,29 +78,6 @@ export const useServersStore = defineStore(
       wsServer.value.publish(subscription, sc.encode(_payload))
     }
 
-    async function getNumberOfClients() {
-      const res = await fetch('http://localhost:8222/connz')
-      const data = await res.json()
-      console.log(`Total clients connected: ${data.num_connections}`)
-    }
-
-    async function getApplicationSubscriptions() {
-      const res = await fetch('http://localhost:8222/subsz?subs=1')
-      const data = await res.json()
-
-      // define known system patterns to filter out
-      const systemPrefixes = ['_INBOX.', '_SYS.', '$JS.', '$SYS.']
-
-      const appSubs = data.subscriptions_list.filter((sub: any) => {
-        return !systemPrefixes.some((prefix) => sub.subject.startsWith(prefix))
-      })
-
-      console.log(`Application subscriptions: ${appSubs.length}`)
-      appSubs.forEach((sub: any) => {
-        console.log(`subject: ${sub.subject} (client id: ${sub.cid})`)
-      })
-    }
-
     return {
       servers,
       wsServer,
@@ -109,8 +85,6 @@ export const useServersStore = defineStore(
       selectedServer,
       subscribe,
       publish,
-      getNumberOfClients,
-      getApplicationSubscriptions,
     }
   },
   {

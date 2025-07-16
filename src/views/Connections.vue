@@ -1,16 +1,16 @@
 <template>
-
-
+    <VDataTable :items />
 </template>
 
 <script setup lang="ts">
-import { useServersStore } from '@/stores/servers';
-import { onMounted } from 'vue';
-const serversStore = useServersStore();
+import { useMonitoringStore } from '@/stores/monitoring'
+import { onMounted, ref } from 'vue'
+const monitoringStore = useMonitoringStore()
+const items = ref();
 
-onMounted(async ()=>{
-    console.log(await serversStore.getNumberOfClients());
-    console.log(await serversStore.getApplicationSubscriptions());
-    
+onMounted(async () => {
+  items.value = await monitoringStore.getClientLists();
+  
+  // console.log(await serversStore.getApplicationSubscriptions())
 })
 </script>

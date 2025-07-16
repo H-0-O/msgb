@@ -1,6 +1,7 @@
 import App from '@/App.vue'
-import Menu from '@/layout/menu.vue'
+import Menu from '@/layout/Menu.vue'
 import Connections from '@/views/Connections.vue'
+import Subscriptions from '@/views/Subscriptions.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 
@@ -16,6 +17,11 @@ const router = createRouter({
       path: '/connections',
       name: 'connections',
       component: Connections
+    },
+    {
+      path: '/subscriptions',
+      name: 'subscriptions',
+      component: Subscriptions
     }
   
   ],
