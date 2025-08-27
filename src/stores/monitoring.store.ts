@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { onMounted, ref, watch } from 'vue'
-import { useServersStore } from './servers'
+import { useServersStore } from './servers.store'
 import axios from 'axios'
 import type { NatsConnectionReport, NatsSubscriptionReport, Server } from '@/util/types'
 

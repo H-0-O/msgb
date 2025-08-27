@@ -8,7 +8,8 @@ import {
   type Subscription,
 } from 'nats.ws'
 import { defineStore } from 'pinia'
-import { onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
+import { destr } from 'destr'
 
 export const useServersStore = defineStore(
   'servers',
@@ -78,6 +79,21 @@ export const useServersStore = defineStore(
       wsServer.value.publish(subscription, sc.encode(_payload))
     }
 
+    async function request<T>(subscription: string, payload: T) {
+      if (!wsServer.value) throw new Error('The connection not established')
+      const _payload = typeof payload == 'string' ? payload : JSON.stringify(payload)
+      try {
+        const re = await wsServer.value.request(subscription, sc.encode(_payload), {
+          timeout: 10000,
+        })
+        const decoded = sc.decode(re.data)
+        return destr(decoded)
+      } catch (e: any) {
+        console.log(`problem with request: ${e.message}`)
+        throw e
+      }
+    }
+
     return {
       servers,
       wsServer,
@@ -85,6 +101,7 @@ export const useServersStore = defineStore(
       selectedServer,
       subscribe,
       publish,
+      request,
     }
   },
   {

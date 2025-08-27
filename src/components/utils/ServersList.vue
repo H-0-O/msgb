@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 // import AddServer from '@/components/AddServer.vue'
-import { useServersStore } from '@/stores/servers'
+import { useServersStore } from '@/stores/servers.store'
 import { onMounted, ref, watch } from 'vue'
 
 const serverStore = useServersStore()

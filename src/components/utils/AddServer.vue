@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { useServersStore } from '@/stores/servers'
+import { useServersStore } from '@/stores/servers.store'
 import type { Server } from '@/util/types'
 import { computed, ref } from 'vue'
 import type { VDialog } from 'vuetify/components'

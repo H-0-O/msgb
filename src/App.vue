@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppBar from './layout/AppBar.vue';
 import Menu from './layout/Menu.vue'
-import { useServersStore } from './stores/servers'
+import { useServersStore } from './stores/servers.store'
 useServersStore()
 </script>
 
